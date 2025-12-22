@@ -29,12 +29,9 @@ const StoreContextProvider = ({ children }) => {
   const api = useMemo(() => {
     return axios.create({
       baseURL: url,
-      headers: token
-        ? { Authorization: `Bearer ${token}` }
-        : {},
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   }, [token, url]);
-
 
   const persistCart = (cart) => {
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -103,25 +100,24 @@ const StoreContextProvider = ({ children }) => {
   }, []);
 
   const loadCartData = useCallback(async () => {
-  if (!token) return;
+    if (!token) return;
 
-  try {
-    const res = await axios.post(
-      `${url}/api/cart/get`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    try {
+      const res = await axios.post(
+        `${url}/api/cart/get`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    setCartItems(res.data?.cartData || {});
-  } catch (err) {
-    console.error("Failed to load cart", err);
-  }
-}, [token, url]);
-
+      setCartItems(res.data?.cartData || {});
+    } catch (err) {
+      console.error("Failed to load cart", err);
+    }
+  }, [token, url]);
 
   const logout = useCallback(() => {
     setToken("");
@@ -134,7 +130,22 @@ const StoreContextProvider = ({ children }) => {
     fetchFoodList();
 
     const savedToken = localStorage.getItem("token");
-    if (savedToken) setToken(savedToken);
+    if (!savedToken) return;
+
+    try {
+      const decoded = JSON.parse(atob(savedToken.split(".")[1]));
+      const isExpired = decoded.exp * 1000 < Date.now();
+
+      if (isExpired) {
+        localStorage.removeItem("token");
+        setToken("");
+      } else {
+        setToken(savedToken);
+      }
+    } catch (error) {
+      localStorage.removeItem("token");
+      setToken("");
+    }
   }, [fetchFoodList]);
 
   useEffect(() => {
