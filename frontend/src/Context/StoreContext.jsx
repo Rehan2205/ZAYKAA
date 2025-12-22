@@ -12,7 +12,8 @@ import { toast } from "react-toastify";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = ({ children }) => {
-  const url = "http://localhost:4000";
+  // const url = "http://localhost:4000";
+  const url = "https://zaykaa-backend.onrender.com";
 
   const [food_list, setFoodList] = useState([]);
   const [menu_list] = useState(staticMenuList);
